@@ -1,11 +1,3 @@
-/*
-* A few assumptions about the questions:
-* - All questions include the option of moving in a diagonal
-* - Question 1:
-* - All the matrices are square. e.g- N x N
-* */
-
-
 package server;
 
 import java.io.*;
@@ -17,11 +9,15 @@ import serverLogic.*;
 public class MatrixIHandler implements IHandler {
     private Matrix matrix;
 
-    @Override
-    public void resetMembers() {
-        this.matrix = null;
-    }
-
+    /**
+     * This class handles all the calculation required by the server to perform on the client's matrix. It gets the
+     * question number and parameters and responds with the correct answer
+     *
+     * @param fromClient is the data stream that we are getting from the socket with the clint.
+     * @param toClient is the data that we will send in the socket to the client
+     * @throws IOException
+     * @throws ClassNotFoundException
+     */
     @Override
     public void handle(InputStream fromClient, OutputStream toClient) throws IOException, ClassNotFoundException {
         /*
@@ -66,8 +62,7 @@ public class MatrixIHandler implements IHandler {
                 case "quest2":{
                     /*
                     * Using DFS we find all the paths to the destination index.
-                    *
-                    * */
+                    */
                     System.out.println("\nQuestion 2 Started");
 
                     int[][] tempArray = (int[][])objectInputStream.readObject();

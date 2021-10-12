@@ -4,6 +4,10 @@ import java.io.Serializable;
 import java.util.Objects;
 
 public class Index implements Serializable {
+    /**
+     * This class represents a slot in a 2D array (matrix). it looks like this @param row
+      */
+
     private int row, column;
 
     public Index(int oRow, int oColumn){

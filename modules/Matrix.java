@@ -30,6 +30,14 @@ public class Matrix implements Serializable {
         return stringBuilder.toString();
     }
 
+    /**
+     * It checks to see if an index in actually available. if so, it is added to the list
+     *
+     * @param index Where to start from
+     * @param plusToRow How much to add to the row
+     * @param plusToCol How much to add to the column
+     * @param list  If the Index is valid it will be added to here
+     */
     private void addIndexToList(Index index, int plusToRow, int plusToCol, Collection<Index> list)
     {
         int extracted;  // Just to test the "try". Won't be used
@@ -39,6 +47,12 @@ public class Matrix implements Serializable {
         }catch (ArrayIndexOutOfBoundsException ignored){}
     }
 
+    /**
+     * Gets the neighbors of a given index where there is 1 value.
+     * @param index where to check from
+     * @param withDiagonals should we include diagonals indices?
+     * @return a list of all the neighbors
+     */
     public Collection<Index> getNeighbors(final Index index, boolean withDiagonals){
         Collection<Index> list = new ArrayList<>();
 
@@ -61,16 +75,6 @@ public class Matrix implements Serializable {
         return primitiveMatrix[index.getRowNum()][index.getColNum()];
     }
 
-
-    public Collection<Index> getAllMatrix() {
-        Collection<Index> list = new ArrayList<>();
-        for(int row=0;row<primitiveMatrix.length;row++)
-        {
-            for(int col=0;col<primitiveMatrix.length;col++)
-                list.add(new Index(row,col));
-        }
-        return list;
-    }
 
     public int getSizeOfMatrix(){ return this.primitiveMatrix.length; }
 

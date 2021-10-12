@@ -3,8 +3,8 @@ import java.util.Objects;
 
 /**
  * This class wraps a concrete object and supplies getters and setters
- * @param <T>
- *
+ * @param <T> will hold the type of the wrapped object.
+ * This is a "container".
  */
 public class Node<T> {
     private T data;

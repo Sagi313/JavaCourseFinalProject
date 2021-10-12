@@ -5,6 +5,7 @@ import java.util.Collection;
 
 /**
  * This interface defines the functionality required for a traversable graph
+ * Helps us run on a matrix as a graph
  */
 public interface Traversable<T> {
     public Node<T> getOrigin();

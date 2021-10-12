@@ -20,6 +20,13 @@ public class TcpServer {
         stopServer = false;
     }
 
+    /**
+     * This function is responsible about listening and opening new connections with clients. It basically manages the
+     * whole server activity. it uses multi-threading to allow a few clients to connect and run at the same time
+     *
+     * @param handler This will tell the server how to solve each question (with MatrixIHandler).
+     */
+
     public void supportClients(IHandler handler) {
         this.requestHandler = handler;
         /*
@@ -27,8 +34,8 @@ public class TcpServer {
          support is done in a separate thread
          */
         Runnable mainServerLogic = () -> {  //corePoolSize= available thread; maximumPoolSize= the max amount of available threads to use; keepAliveTime= number of seconds before killing a thread; LinkedBlockingQueue= The data structure the keeps the thread inside (can't add when full, and can't get when empty)
-            this.threadPool = new ThreadPoolExecutor(3,5,
-                    10, TimeUnit.SECONDS, new LinkedBlockingQueue());
+            this.threadPool = new ThreadPoolExecutor(2,3,
+                    2, TimeUnit.SECONDS, new LinkedBlockingQueue());
             /*
             2 Kinds of sockets
             Server Socket - a server sockets listens and wait for incoming connections
@@ -40,6 +47,7 @@ public class TcpServer {
              */
             try {
                 ServerSocket serverSocket = new ServerSocket(this.port); // Creates and also binds the socket (step 1)
+
                 /*
                 listen to incoming connection and accept if possible
                 be advised: accept is a blocking call
@@ -47,20 +55,21 @@ public class TcpServer {
                 System.out.println("Server is listening...");
 
                 while(!stopServer){
-                    Socket serverClientConnection = serverSocket.accept(); // step 2+3 (listen and establish)
                     // define a task and submit to our threadPool
                     Runnable clientHandling = ()->{
-                        System.out.println("Server: Handling a client");
                         try {
+
+                            Socket serverClientConnection = serverSocket.accept(); // step 2+3 (listen and establish). This is a blocker
+                            System.out.println("Got a new connection!");
                             requestHandler.handle(serverClientConnection.getInputStream(),
                                     serverClientConnection.getOutputStream());
+                            try {
+                                // terminate connection with client
+                                serverClientConnection.close(); // Closing the server connection only once
+                            } catch (IOException ioException) {
+                                ioException.printStackTrace();
+                            }
                         } catch (IOException | ClassNotFoundException ioException) {
-                            ioException.printStackTrace();
-                        }
-                        // terminate connection with client
-                        try {
-                            serverClientConnection.close(); // Closing the server connection only once
-                        } catch (IOException ioException) {
                             ioException.printStackTrace();
                         }
                     };
@@ -74,18 +83,16 @@ public class TcpServer {
         new Thread(mainServerLogic).start();
     }
 
-    public void stop(){
+    private void stop(){    // Just for best-practice
         if(!stopServer){
             stopServer = true;
             if(threadPool!=null)
                 threadPool.shutdown();
         }
-
     }
 
     public static void main(String[] args) {
         TcpServer webServer = new TcpServer(5555);
         webServer.supportClients(new MatrixIHandler());
-
     }
 }

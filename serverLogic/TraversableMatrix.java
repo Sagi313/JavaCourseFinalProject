@@ -6,13 +6,13 @@ import java.util.List;
 import java.util.*;
 import modules.*;
 
-
-// This class implements adapter/wrapper/decorator design pattern
-
+/**
+ * This class implements adapter/wrapper/decorator design pattern
+ */
 public class TraversableMatrix implements Traversable<Index> {
     protected final Matrix matrix;
     protected Index startIndex;
-    protected DfsAlgo dfsAlgorithm = new DfsAlgo();
+    protected final DfsAlgo dfsAlgorithm = new DfsAlgo();
 
     public TraversableMatrix(Matrix matrix) {
         this.matrix = matrix;
@@ -28,7 +28,15 @@ public class TraversableMatrix implements Traversable<Index> {
         return new Node<>(this.startIndex);
 
     }
-
+    /**
+     @param  someNode This is the first parameter to getReachableNodes method
+     @param  isZeroReachable This is the second parameter to getReachableNodes method
+     @param withDiagonals This is the Third parameter to getReachableNodes method
+     The function will get a Node<Index> and 2 more variables that will determined if
+     we are searching neighbors including diagonal in the matrix or if the a node with value 0 is reachable.
+     The function will gather all the neighbors in a List and will return it.
+     @return Collection<Node<Index>>
+     */
     @Override
     public Collection<Node<Index>> getReachableNodes(Node<Index> someNode, boolean isZeroReachable, boolean withDiagonals) {
         List<Node<Index>> reachableIndices = new ArrayList<>();
@@ -48,19 +56,32 @@ public class TraversableMatrix implements Traversable<Index> {
         return matrix.toString();
     }
 
-    // Finds the shortest path to the dest index
+    /**
+     * Finds the shortest path to the dest index
+     *
+     * @param src Where from should we start
+     * @param dest To where do we want to get
+     * @param isZeroReachable Can we go through nodes with the value of zero
+     * @return The shortest path from one node to another
+     */
     public List<List<Index>> getMinimumPath(Index src, Index dest, boolean isZeroReachable) {
         List<List<Index>> allPaths = dfsAlgorithm.getAllPathsFromSrcToDest(this, src, dest, isZeroReachable);
-        return getShortestPathWithWeight(allPaths);
+        return getLightestPath(allPaths);
     }
 
-    // Gets the lightest path(s) out of all the given paths
-    private List<List<Index>> getShortestPathWithWeight(List<List<Index>> lists) {
+
+    /**
+     * Gets the lightest path(s) out of all the given paths. Question 4
+     *
+     * @param allPaths Holds all the possible paths from one node to another
+     * @return The minimal path(s)
+     */
+    private List<List<Index>> getLightestPath(List<List<Index>> allPaths) {
         List<List<Index>> minPaths = new ArrayList<>();
         int min = Integer.MAX_VALUE;
 
         // Finds the lightest path out of all paths
-        for (List<Index> list : lists) {
+        for (List<Index> list : allPaths) {
             int result = 0;
             for (Index i : list) {
                 result += matrix.getValue(i);
@@ -71,7 +92,7 @@ public class TraversableMatrix implements Traversable<Index> {
         }
 
         // To get the other minimal paths, that are in the same size as we found before
-        for (List<Index> list : lists) {
+        for (List<Index> list : allPaths) {
             int result = 0;
             for (Index i : list) {
                 result += matrix.getValue(i);
@@ -85,14 +106,17 @@ public class TraversableMatrix implements Traversable<Index> {
     }
 
 
-    // Find the number of submarines for question 3
+    /**
+     * Used for question 3. main function of it.
+     * @return the amount of valid submarines
+     */
     public int calcSubmarines() {
         int result = 0;
         List<HashSet<Index>> possibleSubmarines = findSCC();    // Find all the strongly connected component
 
         // Go through each component and check if it's a valid submarine
-        for (HashSet<Index> set : possibleSubmarines) {
-            if (isSubmarine(set)) {
+        for (HashSet<Index> component : possibleSubmarines) {
+            if (isSubmarine(component)) {
                 result++;
             }
         }
@@ -100,8 +124,12 @@ public class TraversableMatrix implements Traversable<Index> {
         return result;
     }
 
-    // Find strongly connected components for question 3. uses DFS from each unvisited node.
-    public List<HashSet<Index>> findSCC() {
+
+    /**
+     * Used for question 3. Find strongly connected components for question 3. uses DFS from each unvisited node.
+     * @return a list of all the SCC
+     */
+    private List<HashSet<Index>> findSCC() {
         List<HashSet<Index>> connectionComponentsList = new ArrayList<>(); // Will contain a list of connected components
         HashSet<Node<Index>> visited = new HashSet<>(); // Hashset of indices we already visited
         int sizeOfMatrix = this.matrix.getSizeOfMatrix();
@@ -123,6 +151,11 @@ public class TraversableMatrix implements Traversable<Index> {
         return connectionComponentsList;
     }
 
+    /**
+     * Validates if a SCC is actually a real submarine
+     * @param component The SCC given
+     * @return is it a valid submarine?
+     */
     private boolean isSubmarine(HashSet<Index> component) {
         if (component.size() < 2) {
             return false;

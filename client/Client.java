@@ -11,6 +11,16 @@ import modules.*;
 
 
 public class Client {
+
+    /**
+     * This class represents a client in the system that tries to connect into the server. This file will be located
+     * on the user's side originally.  It creates a connection to the server, sends it the data and the
+     * question number and wait for the answer.
+     *
+     * @throws IOException
+     * @throws ClassNotFoundException
+     */
+
     public static void main(String[] args) throws IOException, ClassNotFoundException {
         Socket socket =new Socket("127.0.0.1",5555);
         System.out.println("Socket got created");
@@ -19,9 +29,9 @@ public class Client {
         ObjectInputStream fromServer=new ObjectInputStream(socket.getInputStream());
 
         int[][] sourceMatrix1 = {
-                {1, 0, 1},
-                {1, 0, 1},
-                {1, 1, 1},
+                {0, 1, 1},
+                {0, 1, 1},
+                {0, 1, 1},
         };
         int[][] sourceMatrix2 = {
                 {1, 0, 1, 1, 1},
@@ -55,7 +65,7 @@ public class Client {
                 {100, 300, 200, 600, 100},
         };
 
-        Index sourceIndex = new Index (1,0);
+        Index sourceIndex = new Index (1,1);
         Index destIndex = new Index(1,2);   // Relevant only for a few questions
 
         /* Question 1 */
