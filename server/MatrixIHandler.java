@@ -42,11 +42,12 @@ public class MatrixIHandler implements IHandler {
                     System.out.println("\nQuestion 1 Started");
 
                     int[][] tempMatrix = (int[][])objectInputStream.readObject();
+                    Index tempIndex = (Index) objectInputStream.readObject();
 
                     this.matrix = new Matrix(tempMatrix);
 
                     TraversableMatrix matrixTrav = new TraversableMatrix(this.matrix);
-                    matrixTrav.setStartIndex(new Index(0,0));
+                    matrixTrav.setStartIndex(tempIndex);
 
                     System.out.println("Got and applied all the parameters");
 
