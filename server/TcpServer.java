@@ -34,7 +34,7 @@ public class TcpServer {
          support is done in a separate thread
          */
         Runnable mainServerLogic = () -> {  //corePoolSize= available thread; maximumPoolSize= the max amount of available threads to use; keepAliveTime= number of seconds before killing a thread; LinkedBlockingQueue= The data structure the keeps the thread inside (can't add when full, and can't get when empty)
-            this.threadPool = new ThreadPoolExecutor(2,3,
+            this.threadPool = new ThreadPoolExecutor(4,5,
                     2, TimeUnit.SECONDS, new LinkedBlockingQueue());
             /*
             2 Kinds of sockets

@@ -94,9 +94,15 @@ public class MatrixIHandler implements IHandler {
                     this.matrix = new Matrix(tempArray);
                     TraversableMatrix matrixTrav = new TraversableMatrix(this.matrix);
 
+                    int numOfSubmarines = -1;
                     System.out.println("Got and applied all the parameters");
+                    try {
+                         numOfSubmarines = matrixTrav.calcSubmarines();
+                    }
+                    catch (InterruptedException e){
+                        e.printStackTrace();
+                    }
 
-                    int numOfSubmarines = matrixTrav.calcSubmarines();
                     objectOutputStream.writeObject(numOfSubmarines);
 
                     System.out.println("Question 3 is finished successfully");

@@ -6,6 +6,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import modules.*;
 
@@ -29,9 +30,9 @@ public class Client {
         ObjectInputStream fromServer=new ObjectInputStream(socket.getInputStream());
 
         int[][] sourceMatrix1 = {
-                {0, 1, 1},
-                {0, 1, 1},
-                {0, 1, 1},
+                {0, 1, 0},
+                {0, 1, 0},
+                {0, 1, },
         };
         int[][] sourceMatrix2 = {
                 {1, 0, 1, 1, 1},
@@ -73,13 +74,13 @@ public class Client {
         toServer.writeObject(sourceMatrix1);
         toServer.writeObject(sourceIndex);
 
-        if (sourceMatrix1[sourceIndex.getRowNum()][sourceIndex.getColNum()] == 0){  // Invalid input base case
-            toServer.writeObject("stop");
-            throw new IllegalArgumentException("The source index cannot be an unreachable node");
-        }
+//        if (sourceMatrix1[sourceIndex.getRowNum()][sourceIndex.getColNum()] == 0){  // Invalid input base case
+//            toServer.writeObject("stop");
+//            throw new IllegalArgumentException("The source index cannot be an unreachable node");
+//        }
 
-        List<Index> reachableIndices =
-                new ArrayList<Index>((List<Index>) fromServer.readObject());
+        HashSet<Index> reachableIndices =
+                new HashSet<Index>((HashSet<Index>) fromServer.readObject());
         System.out.println("\nQuestion One- The reachable indices are: "+ reachableIndices);
 
 

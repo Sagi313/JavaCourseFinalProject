@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.*;
+import java.util.concurrent.*;
+
 import modules.*;
 
 /**
@@ -47,7 +49,6 @@ public class TraversableMatrix implements Traversable<Index> {
                 reachableIndices.add(indexNode);
             }
         }
-
         return reachableIndices;
     }
 
@@ -110,10 +111,10 @@ public class TraversableMatrix implements Traversable<Index> {
      * Used for question 3. main function of it.
      * @return the amount of valid submarines
      */
-    public int calcSubmarines() {
+    public int calcSubmarines() throws InterruptedException {
         int result = 0;
-        List<HashSet<Index>> possibleSubmarines = findSCC();    // Find all the strongly connected component
 
+        List<HashSet<Index>> possibleSubmarines = findSCC();    // Find all the strongly connected component
         // Go through each component and check if it's a valid submarine
         for (HashSet<Index> component : possibleSubmarines) {
             if (isSubmarine(component)) {
@@ -129,27 +130,47 @@ public class TraversableMatrix implements Traversable<Index> {
      * Used for question 3. Find strongly connected components for question 3. uses DFS from each unvisited node.
      * @return a list of all the SCC
      */
-    private List<HashSet<Index>> findSCC() {
+    private List<HashSet<Index>> findSCC() throws InterruptedException {
         List<HashSet<Index>> connectionComponentsList = new ArrayList<>(); // Will contain a list of connected components
-        HashSet<Node<Index>> visited = new HashSet<>(); // Hashset of indices we already visited
         int sizeOfMatrix = this.matrix.getSizeOfMatrix();
 
+
         // Go through each unvisited node and run DFS algo from him (as source vertex), then add the vertices we have visited the the list
+        ThreadPoolExecutor threadPool = new ThreadPoolExecutor(1, this.matrix.getSizeOfMatrix() * this.matrix.getSizeOfMatrix(), 1, TimeUnit.SECONDS, new LinkedBlockingQueue());
         for (int i = 0; i < sizeOfMatrix; i++) {
             for (int j = 0; j < sizeOfMatrix; j++) {
                 Index sourceIndex = new Index(i, j);
-                Node<Index> aNode = new Node<>(sourceIndex);    // This is used to so you will be able to perform the "contains" if statement below
-
-                if (this.matrix.getValue(sourceIndex) == 1 && !(visited.contains(aNode))) {
-                    setStartIndex(sourceIndex);
-                    connectionComponentsList.add((HashSet<Index>) new ThreadLocalDFS<Index>().traverse(this, visited));
-                }
+                Callable<String> ThreadinVisited = () ->
+                {
+                    if (this.matrix.getValue(sourceIndex) == 1) {
+                        boolean visitedFlag = false;
+                        if (this.matrix.getValue(sourceIndex) == 1) {
+                            for (HashSet<Index> comp : connectionComponentsList) {
+                                for (Index simillarNode : comp) {
+                                    if (sourceIndex.equals(simillarNode)) {
+                                        visitedFlag = true;
+                                    }
+                                }
+                            }
+                        }
+                        if (visitedFlag == false) {
+                            setStartIndex(sourceIndex);
+                            connectionComponentsList.add((HashSet<Index>) new ThreadLocalDFS<Index>().traverse(this));
+                        }
+                    }
+                    return null;
+                };
+                Future<String> x = threadPool.submit(ThreadinVisited);
             }
         }
+        threadPool.shutdown();
+        threadPool.awaitTermination(5, TimeUnit.SECONDS);
 
         connectionComponentsList.sort(Comparator.comparingInt(Set::size)); // Sort the list by size
         return connectionComponentsList;
     }
+
+
 
     /**
      * Validates if a SCC is actually a real submarine
@@ -161,14 +182,25 @@ public class TraversableMatrix implements Traversable<Index> {
             return false;
         }  // A submarine needs to have at least 2 slots
 
-        Index minCol = component.stream().min(Comparator.comparing(Index::getColNum)).orElseThrow(NoSuchElementException::new);
-        Index minRow = component.stream().min(Comparator.comparing(Index::getRowNum)).orElseThrow(NoSuchElementException::new);
-        Index maxCol = component.stream().max(Comparator.comparing(Index::getColNum)).orElseThrow(NoSuchElementException::new);
-        Index maxRow = component.stream().max(Comparator.comparing(Index::getRowNum)).orElseThrow(NoSuchElementException::new);
+        int minRow=Integer.MAX_VALUE;
+        int minCol=Integer.MAX_VALUE;
+        int maxRow=Integer.MIN_VALUE;
+        int maxCol=Integer.MIN_VALUE;
+        for (Index obj : component){
+            if (obj.getColNum() > maxCol)
+                maxCol = obj.getColNum();
+            if (obj.getColNum() < minCol)
+                minCol = obj.getColNum();
+            if (obj.getRowNum() > maxRow)
+                maxRow = obj.getRowNum();
+            if (obj.getRowNum() < minRow)
+                minRow = obj.getRowNum();
+        }
+
 
         // Make sure that every slot inside the "square" is 1 ( a valid submarine )
-        for (int i = minRow.getRowNum(); i < maxRow.getRowNum(); i++) {
-            for (int j = minCol.getColNum(); j < maxCol.getColNum(); j++) {
+        for (int i = minRow; i <= maxRow; i++) {
+            for (int j = minCol; j <= maxCol; j++) {
                 if (this.matrix.getValue(new Index(i, j)) != 1) {
                     return false;
                 }
